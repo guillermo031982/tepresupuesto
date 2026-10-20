@@ -1,11 +1,11 @@
 const ZONAS=['Recepción / Hall','Bar','Cafetería','Restaurante','Buffet','Cocina principal','Cocina auxiliar','Office','Cámaras frigoríficas','Almacén de alimentos','Almacén general','Bodega','Economato','Cuarto de basuras','Muelle de carga','Lavandería','Lencería','Habitaciones','Pasillos de habitaciones','Piscina','Bar de piscina','Jardines','Zonas verdes','Terrazas','Azotea','Patios','Spa','Gimnasio','Vestuarios','Aseos públicos','Sala de máquinas','Sala de calderas','Cuarto de contadores','Garaje / Parking','Trasteros','Ascensores','Escaleras','Portal','Zonas comunes','Arquetas y alcantarillado','Bajantes','Comedor de personal','Oficinas','Salón de eventos','Discoteca / Animación','Parque infantil','Otra'];
 const PLAGAS=['Cucarachas (germánica)','Cucarachas (americana)','Roedores (ratas/ratones)','Hormigas','Termitas / Xilófagos','Mosquitos','Moscas','Chinches','Pulgas','Palomas','Polilla','Pececillo de plata','Avispas','Otra'];
 const TRAT=['Gel insecticida','Pulverización','Nebulización / Termonebulización','Estaciones portacebos','Trampas de captura','Desinsectación en arquetas','Barrera física / sellado','Repelente aves','Tratamiento xilófagos','Inspección y seguimiento'];
-let S=JSON.parse(localStorage.tp||'null')||{cli:{nombre:'',tipo:'hotel',dir:'',fecha:new Date().toISOString().slice(0,10),tecnico:'',tel:'',email:''},zonas:[]};
+let S=null,LIST=[];
 const DEFSRV=[['Tratamiento con cebo en gel','Aplicación de cebo en gel de uso profesional en grietas y hendiduras'],['Pulverización residual','Insecticida residual en zócalos, rodapiés y puntos de paso'],['Nebulización / termonebulización','Tratamiento aéreo en espacios cerrados y huecos'],['Portacebos rodenticidas','Instalación y revisión de estaciones portacebos con seguridad'],['Trampas de luz UV para moscas','Equipos de captura con lámina adhesiva en cocinas y office'],['Monitoreo y seguimiento','Trampas de monitorización y revisiones periódicas con informe'],['Desinsectación de arquetas','Tratamiento de arquetas, sumideros y redes de saneamiento'],['Control aviar','Instalación de pinchos, redes y repelentes para palomas'],['Sellado de accesos','Sellado de huecos, pasos de tubería y puntos de entrada'],['Desratización','Plan integral de control de roedores'],['Servicio DDD','Desinfección, desinsectación y desratización con certificado sanitario']];
-let SRV=JSON.parse(localStorage.tpSrv||'null')||DEFSRV.map(([n,d],i)=>({id:'s'+i,n,d}));const saveSrv=()=>localStorage.tpSrv=JSON.stringify(SRV);
-let step=+(localStorage.tpStep||0);
-const save=()=>{try{localStorage.tp=JSON.stringify(S);localStorage.tpStep=step}catch(e){alert('Memoria llena: reduce fotos')}};
+let SRV=[];const saveSrv=()=>{mSet('srv',SRV);mark()};
+let step=0;
+let _t;const save=()=>{if(!S)return;S.upd=Date.now();clearTimeout(_t);_t=setTimeout(()=>{dbPut(S).then(loadList);mSet('cur',S.id);mSet('step',step);mark()},300)};
 const $=q=>document.querySelector(q),esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const N=()=>S.zonas.length+2;const eur=n=>(+n||0).toLocaleString('es-ES',{style:'currency',currency:'EUR'});
 function go(i){window.SRVV=0;step=Math.max(0,Math.min(N()-1,i));save();render();scrollTo(0,0)}
@@ -23,7 +23,9 @@ function portada(){const c=S.cli;$('#view').innerHTML=`<div class="hero"><img sr
 ${f('nombre','Nombre del cliente / establecimiento',c.nombre,'text','Hotel Las Palmeras')}${f('dir','Dirección',c.dir)}${f('tel','Teléfono',c.tel,'tel')}${f('email','Email',c.email,'email')}${f('fecha','Fecha',c.fecha,'date')}${f('tecnico','Técnico',c.tecnico)}
 <button class="more ${window.EXP?'on':''}" id="more">${window.EXP?'▾':'▸'} Datos adicionales de la empresa <small style="font-weight:400">(opcional)</small></button>
 ${window.EXP?`<div class="extra">${f('cif','CIF',c.cif)}${f('hotel','Nombre del hotel',c.hotel)}${f('empresa','Nombre de la empresa',c.empresa)}${f('dirfiscal','Dirección fiscal',c.dirfiscal)}${f('dirhotel','Dirección del hotel',c.dirhotel)}</div>`:''}</div>
-<button class="more" style="margin-bottom:12px" onclick="window.SRVV=1;render()">🧰 Servicios (catálogo) <small style="font-weight:400">— ${SRV.length} servicios</small></button><div class="card"><b>${S.zonas.length}</b> puntos calientes · <button class="del" onclick="if(confirm('¿Empezar presupuesto nuevo?')){localStorage.removeItem('tp');location.reload()}">Nuevo presupuesto</button></div>`;
+<button class="more" style="margin-bottom:12px" onclick="window.SRVV=1;render()">🧰 Servicios (catálogo) <small style="font-weight:400">— ${SRV.length} servicios</small></button><div class="card"><b>${S.zonas.length}</b> zonas (${S.zonas.filter(z=>z.hot).length} 🔥) · <button class="del" onclick="nuevo()">＋ Nuevo presupuesto</button></div>
+<div class="card"><h3 style="margin:0 0 8px;color:var(--r)">📂 Historial (${LIST.length})</h3>${LIST.map(q=>`<div class="hrow ${q.id==S.id?'cur':''}"><div><b>${esc(q.cli?.nombre)||'(sin nombre)'}</b> <span class="tag">${q.cli?.tipo=='comunidad'?'Comunidad':'Hotel'}</span><br><small>${q.cli?.fecha?new Date(q.cli.fecha).toLocaleDateString('es-ES'):''} · ${(q.zonas||[]).length} zonas · ${(q.zonas||[]).some(z=>+z.precio>0)?'Presupuesto':'Valoración'}${q.id==S.id?' · <b>abierto</b>':''}</small></div><div class="hb"><button onclick="abrir('${q.id}')">Abrir</button><button onclick="duplicar('${q.id}')">Duplicar</button><button onclick="borrar('${q.id}')">🗑</button></div></div>`).join('')||'<small>Sin presupuestos guardados.</small>'}</div>
+<div class="card"><h3 style="margin:0 0 8px;color:var(--r)">💾 Copia de seguridad</h3><small>Se guarda como archivo en Descargas del dispositivo (fuera de la app). Última copia: ${CFG.lastBackup?new Date(CFG.lastBackup).toLocaleString('es-ES'):'nunca'}</small><div class="hrs" style="margin-top:8px"><button class="more" style="margin:0" onclick="exportar()">⬇ Exportar copia</button><label class="more" style="margin:0;text-align:center">⬆ Restaurar copia<input type="file" accept=".json,application/json" hidden onchange="this.files[0]&&restaurar(this.files[0])"></label></div><label class="chk"><input type="checkbox" ${CFG.auto?'checked':''} onchange="CFG.auto=this.checked;mSet('cfg',CFG)"> Copia automática diaria (al abrir la app si hay cambios)</label></div>`;
  $('#more').onclick=()=>{window.EXP=!window.EXP;portada()};
  ['nombre','dir','tel','email','fecha','tecnico','cif','hotel','empresa','dirfiscal','dirhotel'].forEach(k=>{const el=$('#'+k);if(el)el.oninput=e=>{c[k]=e.target.value;save()}});
  document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{c.tipo=b.dataset.t;save();portada()})}
@@ -56,5 +58,18 @@ ${VAL?'':`<table><tr><th>Concepto</th><th style="text-align:right">Importe</th><
 <tr><td>Base imponible</td><td style="text-align:right">${eur(base)}</td></tr><tr><td>IGIC 7%</td><td style="text-align:right">${eur(ig)}</td></tr><tr class="tot"><td>TOTAL</td><td style="text-align:right">${eur(base+ig)}</td></tr></table>`}
 <div class="box"><b>Condiciones:</b> Validez del presupuesto: 30 días. Teneplagas S.L., empresa autorizada por Sanidad. Tratamientos de todo tipo de plagas.</div>
 <div class="firmas"><div>Por Teneplagas S.L.<br>${esc(c.tecnico)}</div><div>Conforme cliente<br>${esc(c.nombre)}</div></div></div>`}
-window.EXP=['cif','hotel','empresa','dirfiscal','dirhotel'].some(k=>S.cli[k]);
-if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');render();
+async function loadList(){LIST=(await dbAll()).sort((a,b)=>b.upd-a.upd);if(step==0&&!window.SRVV&&document.activeElement?.tagName!='INPUT'&&document.activeElement?.tagName!='TEXTAREA')render()}
+async function nuevo(){await dbPut(S);S=newQ();step=0;await dbPut(S);mSet('cur',S.id);window.EXP=0;await loadList();render();toast('Nuevo presupuesto creado')}
+async function abrir(id){await dbPut(S);S=(await dbAll()).find(q=>q.id==id);step=0;mSet('cur',id);window.EXP=['cif','hotel','empresa','dirfiscal','dirhotel'].some(k=>S.cli[k]);await loadList();render()}
+async function duplicar(id){const q=structuredClone((await dbAll()).find(q=>q.id==id));q.id=uid();q.creado=q.upd=Date.now();q.cli.nombre=(q.cli.nombre||'')+' (copia)';await dbPut(q);mark();await loadList();render();toast('Duplicado')}
+async function borrar(id){const q=LIST.find(x=>x.id==id);if(!confirm(`¿Eliminar definitivamente "${q?.cli?.nombre||'(sin nombre)'}"?`))return;await dbDel(id);mark();if(id==S.id){S=LIST.find(x=>x.id!=id)||newQ();await dbPut(S);mSet('cur',S.id)}await loadList();render()}
+(async()=>{
+ try{await migrar()}catch(e){console.warn(e)}
+ SRV=(await mGet('srv'))||DEFSRV.map(([n,d],i)=>({id:'s'+i,n,d}));CFG=Object.assign(CFG,await mGet('cfg')||{});
+ const all=await dbAll(),cur=await mGet('cur');S=all.find(q=>q.id==cur)||all.sort((a,b)=>b.upd-a.upd)[0];
+ if(!S){S=newQ();await dbPut(S);mSet('cur',S.id)}else step=Math.min(+(await mGet('step'))||0,S.zonas.length+1);
+ window.EXP=['cif','hotel','empresa','dirfiscal','dirhotel'].some(k=>S.cli[k]);await loadList();render();
+ if(navigator.storage?.persist)navigator.storage.persisted().then(p=>p||navigator.storage.persist());
+ if(CFG.auto&&CFG.lastBackupDay!=hoy()&&CFG.lastChange>CFG.lastBackup)setTimeout(()=>exportar(true),1200);
+})();
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
