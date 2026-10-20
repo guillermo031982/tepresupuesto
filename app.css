@@ -50,3 +50,5 @@ body{padding-bottom:230px}#fabs{bottom:128px}
 .hb{flex-wrap:wrap}.hb button{font-size:13px}
 @media print{.nav{display:none!important}}
 #steps:empty{display:none}
+.seg button{padding:12px 6px;font-size:14px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}@media(max-width:420px){.seg{gap:6px}.seg button{font-size:13px;padding:11px 4px}}
+@media(max-width:480px){.seg button{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12.5px;padding:8px 2px;white-space:normal;overflow:visible}.seg button span{display:block}}
