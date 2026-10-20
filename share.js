@@ -6,7 +6,7 @@ function loading(on,t){let d=$('#loadov');if(!on){d&&d.remove();return}if(!d){d=
 async function makePDF(){
  const src=$('.doc');const W=794,H=Math.round(W*297/210),M=0;// px a 96dpi
  const box=document.createElement('div');box.style.cssText=`position:fixed;left:-10000px;top:0;width:${W}px;background:#fff`;
- const cl=src.cloneNode(true);cl.style.cssText='box-shadow:none;max-width:none;width:'+W+'px;margin:0;padding:45px';box.appendChild(cl);document.body.appendChild(box);
+ const cl=src.cloneNode(true);box.className='pdfmode';const oc=src.querySelectorAll('canvas');cl.querySelectorAll('canvas').forEach((c,i)=>{const im=new Image();im.src=oc[i].toDataURL();im.style.cssText='width:100%;height:100%;display:block';c.replaceWith(im)});cl.style.cssText='box-shadow:none;max-width:none;width:'+W+'px;margin:0;padding:45px';box.appendChild(cl);document.body.appendChild(box);
  await Promise.all([...cl.querySelectorAll('img')].map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));
  // puntos de corte: no partir zonas, filas, cajas
  const top0=cl.getBoundingClientRect().top,blocks=[...cl.querySelectorAll('.dh,.box,.hotsum,.z,tr,.firmas,h3')].map(e=>{const r=e.getBoundingClientRect();return[r.top-top0,r.bottom-top0]});
