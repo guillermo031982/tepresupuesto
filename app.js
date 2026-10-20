@@ -51,7 +51,7 @@ function vista(v){window.SRVV=v;render();scrollTo(0,0)}
 const isVal=q=>!(q.zonas||[]).some(z=>+z.precio>0);
 function historial(){const f=(window.HQ||'').toLowerCase(),ft=window.HT||'';
  const R=LIST.filter(q=>(!f||[(q.cli?.nombre||''),q.cli?.hotel||'',q.cli?.empresa||'',q.cli?.dir||''].join(' ').toLowerCase().includes(f))&&(!ft||ft==q.cli?.tipo||(ft=='val'&&isVal(q))||(ft=='pre'&&!isVal(q))));
- $('#view').innerHTML=`<div class="card"><div class="hhead"><h2 style="margin:0;color:var(--r)">📂 Historial <small style="color:var(--g);font-size:14px">(${LIST.length})</small></h2><button class="pbtn" style="margin:0;padding:10px 14px" onclick="nuevo()">＋ Nuevo</button></div>
+ $('#view').innerHTML=`<div class="card"><div class="hhead"><h2 style="margin:0;color:var(--r)">📂 Historial <small style="color:var(--g);font-size:14px">(${LIST.length})</small></h2></div>
 <input id="hq" placeholder="🔍 Buscar por cliente, hotel o dirección…" value="${esc(window.HQ||'')}" style="margin-top:10px">
 <div class="chips">${[['','Todos'],['hotel','Hoteles'],['comunidad','Comunidades'],['estab','Establecimientos'],['pre','Presupuestos'],['val','Valoraciones']].map(([k,t])=>`<button class="${ft==k?'on':''}" onclick="window.HT='${k}';render()">${t}</button>`).join('')}</div></div>
 <div class="card" style="padding:4px 14px">${R.map(q=>`<div class="hrow ${q.id==S.id?'cur':''}"><div class="hi"><b>${esc(q.cli?.nombre)||'(sin nombre)'}</b><div class="tags"><span class="tag">${esc(TL(q.cli))}</span><span class="tag ${isVal(q)?'tv':'tp'}">${isVal(q)?'Valoración':'Presupuesto'}</span>${q.id==S.id?'<span class="tag tc">Abierto</span>':''}</div><small>📅 ${q.cli?.fecha?new Date(q.cli.fecha).toLocaleDateString('es-ES'):'—'} · ${(q.zonas||[]).length} zonas${(q.zonas||[]).some(z=>z.hot)?` · 🔥 ${(q.zonas||[]).filter(z=>z.hot).length}`:''}</small></div>
@@ -79,6 +79,8 @@ ${VAL?'':`<table><tr><th>Concepto</th><th style="text-align:right">Importe</th><
 <div class="box"><b>Condiciones:</b> Validez del presupuesto: 30 días. Teneplagas S.L., empresa autorizada por Sanidad.</div>
 <div class="firmas"><div>Por Teneplagas S.L.<br>${esc(c.tecnico)}</div><div>Conforme cliente<br>${esc(c.nombre)}</div></div></div>`}
 async function loadList(){LIST=(await dbAll()).sort((a,b)=>b.upd-a.upd);if(step==0&&window.SRVV!='cfg'&&document.activeElement?.tagName!='INPUT'&&document.activeElement?.tagName!='TEXTAREA')render()}
+function pedirNuevo(){const d=document.createElement('div');d.id='modal';d.innerHTML=`<div class="mbox"><div style="font-size:34px">📝</div><p>¿Desea realizar un nuevo presupuesto?<br><small>El actual se guardará en el historial.</small></p><div class="mb"><button id="mNo">Cancelar</button><button id="mSi">Sí, nuevo</button></div></div>`;document.body.appendChild(d);
+ d.querySelector('#mNo').onclick=()=>d.remove();d.onclick=e=>{if(e.target==d)d.remove()};d.querySelector('#mSi').onclick=async()=>{d.remove();await nuevo();scrollTo(0,0)}}
 async function nuevo(){window.SRVV=0;await dbPut(S);S=newQ();step=0;await dbPut(S);mSet('cur',S.id);window.EXP=0;await loadList();render();toast('Nuevo presupuesto creado')}
 async function abrir(id){window.SRVV=0;await dbPut(S);S=(await dbAll()).find(q=>q.id==id);step=0;mSet('cur',id);window.EXP=['cif','hotel','empresa','dirfiscal','dirhotel'].some(k=>S.cli[k]);await loadList();render()}
 async function duplicar(id){const q=structuredClone((await dbAll()).find(q=>q.id==id));q.id=uid();q.creado=q.upd=Date.now();q.cli.nombre=(q.cli.nombre||'')+' (copia)';await dbPut(q);mark();await loadList();render();toast('Duplicado')}
