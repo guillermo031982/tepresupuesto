@@ -70,3 +70,7 @@ body{padding-bottom:230px}#fabs{bottom:128px}
 @media print{.fclr,.fhint{display:none!important}.fni{display:none}.fnp{display:block}.firmas{flex-direction:row}}
 .pdfmode .fclr,.pdfmode .fhint{display:none!important}.pdfmode .fni{display:none}.pdfmode .fnp{display:block}.pdfmode .firmas{flex-direction:row}
 .fbox input.fni{border:0;border-top:1px solid #333!important;border-radius:0}
+.dfoot{margin-top:18px;padding-top:8px;border-top:2px solid var(--r);font-size:11px;color:#666;text-align:center}
+.pdfst{text-align:center;font-size:13px;min-height:18px;color:var(--g)}.pdfst.ok{color:#1fa855;font-weight:700}.pdfst.err{color:var(--r);font-weight:700}
+.toast.tacc{display:flex;flex-direction:column;gap:8px;align-items:center}.tb{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}.tb button{border:0;border-radius:6px;padding:8px 12px;font-weight:700;background:#fff;color:#222}.tb button:first-child{background:var(--r);color:#fff}
+@media print{.pdfst{display:none!important}}.pdfmode .pdfst{display:none}

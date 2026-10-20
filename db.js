@@ -13,7 +13,7 @@ let CFG={auto:true,lastBackup:0,lastBackupDay:'',lastChange:0};
 const mark=()=>{CFG.lastChange=Date.now();mSet('cfg',CFG)};
 function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),4500)}
 async function exportar(auto){
-  const data={app:'tepresupuesto',version:1,fecha:new Date().toISOString(),presupuestos:await dbAll(),servicios:SRV};
+  const data={app:'tepresupuesto',version:1,fecha:new Date().toISOString(),presupuestos:await dbAll(),servicios:SRV,empresa:CFG.emp||null};
   const b=new Blob([JSON.stringify(data)],{type:'application/json'}),a=document.createElement('a');
   a.href=URL.createObjectURL(b);a.download=`teneplagas-copia-${hoy()}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
   CFG.lastBackup=Date.now();CFG.lastBackupDay=hoy();await mSet('cfg',CFG);
@@ -27,6 +27,7 @@ async function restaurar(file){
   const over=dup.length?confirm(`${dup.length} presupuesto(s) de la copia ya existen en el dispositivo.\n¿Sobrescribirlos con la versión de la copia?\n(Aceptar = sobrescribir, Cancelar = conservar los actuales)`):false;
   for(const q of d.presupuestos){if(cur[q.id]&&!over){s++;continue}await dbPut(q);cur[q.id]?o++:n++}
   if(Array.isArray(d.servicios))for(const v of d.servicios){const i=SRV.findIndex(x=>x.id==v.id);if(i<0)SRV.push(v);else if(over)SRV[i]=v}
+  if(d.empresa&&(over||!CFG.emp||!Object.values(CFG.emp).some(v=>(v||'').trim()))){CFG.emp=d.empresa;await mSet('cfg',CFG)}
   await mSet('srv',SRV);mark();
   if(cur[S.id]&&over){const q=d.presupuestos.find(x=>x.id==S.id);if(q)S=q}
   toast(`Restaurado: ${n} nuevos, ${o} sobrescritos, ${s} conservados`);await loadList();render();
