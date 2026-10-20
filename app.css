@@ -37,3 +37,16 @@ table{width:100%;border-collapse:collapse;margin-top:12px}td,th{padding:8px;bord
 .hrow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #eee}.hrow.cur{background:#fff7f8;border-left:3px solid var(--r);padding-left:8px}
 .tag{background:var(--g);color:#fff;font-size:11px;border-radius:8px;padding:2px 7px}.hb{display:flex;gap:4px;flex:none}.hb button{border:1px solid var(--g);background:#fff;border-radius:6px;padding:7px 9px;font-weight:600}.hb button:first-child{background:var(--r);color:#fff;border-color:var(--r)}
 .toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:#222;color:#fff;padding:12px 18px;border-radius:10px;z-index:99;width:max-content;max-width:90%;box-shadow:0 4px 14px #0005}
+/* v10 layout */
+.top{position:relative}#cfgb{margin-left:auto;border:1px solid #ccc;background:#fff;color:var(--g);border-radius:20px;padding:8px 12px;font-weight:700;font-size:15px}
+@media(max-width:420px){#cfgb span{display:none}#cfgb{font-size:20px;padding:6px 10px}}
+.nav{flex-direction:column;padding:0;gap:0}.navb{display:flex;gap:8px;padding:8px 10px}
+#tabs{display:flex;border-top:1px solid #ddd;background:#fafafa;padding-bottom:env(safe-area-inset-bottom)}#tabs button{flex:1;border:0;background:none;color:var(--g);border-radius:0;padding:10px;font-weight:700;font-size:14px;border-top:3px solid transparent}#tabs button.on{color:var(--r);border-top-color:var(--r);background:#fff}
+body{padding-bottom:230px}#fabs{bottom:128px}
+
+.hhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.chips button{border:1px solid #ccc;background:#fff;border-radius:16px;padding:6px 12px;font-size:13px}.chips button.on{background:var(--g);color:#fff;border-color:var(--g)}
+.hrow{flex-wrap:wrap}.hi{flex:1;min-width:180px}.tags{display:flex;gap:4px;margin:4px 0}.tag.tp{background:var(--r)}.tag.tv{background:#888}.tag.tc{background:#fff;color:var(--r);border:1px solid var(--r)}
+.hb{flex-wrap:wrap}.hb button{font-size:13px}
+@media print{.nav{display:none!important}}
+#steps:empty{display:none}
