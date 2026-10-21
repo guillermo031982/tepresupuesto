@@ -9,11 +9,12 @@ async function makePDF(){
  const cl=src.cloneNode(true);box.className='pdfmode';const oc=src.querySelectorAll('canvas');cl.querySelectorAll('canvas').forEach((c,i)=>{const im=new Image();im.src=oc[i].toDataURL();im.style.cssText='width:100%;height:100%;display:block';c.replaceWith(im)});cl.style.cssText='box-shadow:none;max-width:none;width:'+W+'px;margin:0;padding:45px';box.appendChild(cl);document.body.appendChild(box);
  await Promise.all([...cl.querySelectorAll('img')].map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));
  // puntos de corte: no partir zonas, filas, cajas
- const top0=cl.getBoundingClientRect().top,blocks=[...cl.querySelectorAll('.dh,.box,.hotsum,.z,tr,.firmas,h3')].map(e=>{const r=e.getBoundingClientRect();return[r.top-top0,r.bottom-top0]});
+ const top0=cl.getBoundingClientRect().top,blocks=[...cl.querySelectorAll('.dh,.box,.hotsum,.z,tr,.firmas,h3')].map(e=>{const r=e.getBoundingClientRect();return[r.top-top0,r.bottom-top0]});const ub=cl.querySelector('.ubic'),ubY=ub?ub.getBoundingClientRect().top-top0-10:-1;
  const sc=2,cv=await html2canvas(cl,{scale:sc,backgroundColor:'#fff',useCORS:true,logging:false});box.remove();
  const total=cv.height/sc,pdf=new jspdf.jsPDF({unit:'px',format:[W,H],hotfixes:['px_scaling'],compress:true});
  let y=0,pg=0;while(y<total-2){let end=Math.min(y+H,total);
   if(end<total){const cut=blocks.filter(([a,b])=>a<end&&b>end&&a>y+60).map(([a])=>a);if(cut.length)end=Math.min(...cut)-4}
+  if(ubY>y+20&&ubY<end)end=ubY;
   const h=end-y,pc=document.createElement('canvas');pc.width=cv.width;pc.height=Math.ceil(h*sc);const ctx=pc.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,pc.width,pc.height);ctx.drawImage(cv,0,-y*sc);
   if(pg++)pdf.addPage([W,H]);pdf.addImage(pc.toDataURL('image/jpeg',.82),'JPEG',0,0,W,h,undefined,'FAST');
   pdf.setFontSize(9);pdf.setTextColor(150);pdf.text(`Página ${pg}`,W-60,H-14);y=end}

@@ -76,14 +76,14 @@ const HP=z=>+z.precio>0;
 const ORD=()=>[...S.zonas.filter(z=>z.hot),...S.zonas.filter(z=>!z.hot)];
 function doc(){const VAL=!S.zonas.some(HP),c=S.cli,base=S.zonas.reduce((a,z)=>a+(+z.precio||0),0),ig=base*.07,num='TP-'+(c.fecha||'').replace(/-/g,'')+'-'+(c.nombre||'X').slice(0,3).toUpperCase();
  const fecha=c.fecha?new Date(c.fecha).toLocaleDateString('es-ES'):'';
- $('#view').innerHTML=`<div class="pdfst" id="pdfst"></div><div class="acts"><button class="pbtn" onclick="print()">🖨 Imprimir / Guardar PDF</button><button class="pbtn sb wa" onclick="compartir('wa')">📲 Enviar por WhatsApp</button><button class="pbtn sb" onclick="compartir('mail')">✉ Enviar por correo</button><button class="pbtn sb gr" onclick="compartir('dl')">⬇ Descargar PDF</button></div><div class="doc">
+ $('#view').innerHTML=`<div class="pdfst" id="pdfst"></div><div class="acts"><button class="pbtn" onclick="print()">🖨 Imprimir / Guardar PDF</button><button class="pbtn sb wa" onclick="compartir('wa')">📲 Enviar por WhatsApp</button><button class="pbtn sb" onclick="compartir('mail')">✉ Enviar por correo</button><button class="pbtn sb gr" onclick="compartir('dl')">⬇ Descargar PDF</button></div>${geoPanel()}<div class="doc">
 <div class="dh"><div style="display:flex;gap:10px;align-items:center"><img src="logo.png"><div><b style="color:var(--r);font-size:20px;letter-spacing:2px">${esc(EMP().nombre.toUpperCase())}</b><br><small>Control de plagas · Empresa certificada por Sanidad${empLines()}</small></div></div><div style="text-align:right"><h2>${VAL?'VALORACIÓN TÉCNICA':'PRESUPUESTO'}</h2><small>Nº ${esc(num)}<br>Fecha: ${fecha}</small></div></div>
 <div class="box"><b>Cliente:</b> ${esc(c.nombre)} (${c.tipo=='estab'?'Establecimiento: '+esc(TL(c)):TL(c,1)})<br><b>Dirección:</b> ${esc(c.dir)}<br>${c.tel?'<b>Tel:</b> '+esc(c.tel)+' ':''}${c.email?'<b>Email:</b> '+esc(c.email):''}${[['empresa','Empresa'],['cif','CIF'],['dirfiscal','Dirección fiscal'],['hotel','Hotel'],['dirhotel','Dirección del establecimiento']].filter(([k])=>(c[k]||'').trim()).map(([k,l])=>`<br><b>${l}:</b> ${esc(c[k])}`).join('')}<br><b>Técnico:</b> ${esc(c.tecnico)}</div>
 ${(H=>H.length?`<div class="hotsum"><b>🔥 Puntos calientes (${H.length}) — prioridad alta</b><ul>${H.map(z=>`<li><b>${esc(ZT(z))}</b>${z.plaga?' — '+esc(z.plaga):''}</li>`).join('')}</ul></div>`:'')(S.zonas.filter(z=>z.hot))}<h3>Puntos de inspección</h3>${ORD().map((z,i)=>{const fs=z.fotos||[];return `<div class="z ${z.hot?'zhot':''}">${z.hot?'<div class="flag">🔥 PUNTO CALIENTE · PRIORIDAD ALTA</div>':''}<h3><span>${i+1}. ${esc(ZT(z))}</span><span>${HP(z)?eur(z.precio):''}</span></h3><p style="font-size:14px;margin:6px 0"><b>Plaga:</b> ${esc(z.plaga)}${z.abre||z.cierra?` · <b>Horario:</b> ${z.abre||'—'} – ${z.cierra||'—'}`:''}<br>${esc(z.obs)}</p>${(z.srv||[]).map(id=>SRV.find(v=>v.id==id)).filter(Boolean).length?`<div class="zs"><b>Servicios:</b><ul>${(z.srv||[]).map(id=>SRV.find(v=>v.id==id)).filter(Boolean).map(v=>`<li><b>${esc(v.n)}</b>${v.d?' — '+esc(v.d):''}</li>`).join('')}</ul></div>`:''}${fs[0]||fs[1]?`<div class="c2">${[0,1].filter(k=>fs[k]).map(k=>`<img src="${fs[k]}">`).join('')}</div>`:''}${fs.slice(2).some(x=>x)?`<div class="g6">${fs.slice(2).filter(x=>x).map(x=>`<img src="${x}">`).join('')}</div>`:''}</div>`}).join('')||'<p>Sin zonas añadidas.</p>'}
 ${VAL?'':`<table><tr><th>Concepto</th><th style="text-align:right">Importe</th></tr>${ORD().filter(HP).map((z,i)=>`<tr><td>${z.hot?'🔥 ':''}${i+1}. ${esc(ZT(z))}</td><td style="text-align:right">${eur(z.precio)}</td></tr>`).join('')}
 <tr><td>Base imponible</td><td style="text-align:right">${eur(base)}</td></tr><tr><td>IGIC 7%</td><td style="text-align:right">${eur(ig)}</td></tr><tr class="tot"><td>TOTAL</td><td style="text-align:right">${eur(base+ig)}</td></tr></table>`}
 <div class="box"><b>Condiciones:</b> Validez del presupuesto: 30 días. ${esc(EMP().nombre)}, empresa autorizada por Sanidad.</div>
-<div class="firmas">${[['tec','Firma del técnico · '+esc(EMP().nombre),`<div class="fn">${esc(c.tecnico)||'&nbsp;'}</div>`],['cli','Conforme cliente',`<input class="fn fni" id="firmante" placeholder="Nombre de quien firma (opcional)" value="${esc(c.firmante||'')}"><div class="fn fnp">${esc(c.firmante||'')||'&nbsp;'}</div><div class="fsub">${esc(c.nombre)}</div>`]].map(([k,t,n])=>`<div class="fbox"><div class="ft">${t}</div><div class="fpad"><canvas data-k="${k}"></canvas><button class="fclr" onclick="borrarFirma('${k}')">Borrar</button>${(S.firmas||{})[k]?'':'<span class="fhint">Firme aquí ✍</span>'}</div>${n}</div>`).join('')}</div>${empFooter()}</div>`;initFirmas();pdfState();invalidatePDF()}
+<div class="firmas">${[['tec','Firma del técnico · '+esc(EMP().nombre),`<div class="fn">${esc(c.tecnico)||'&nbsp;'}</div>`],['cli','Conforme cliente',`<input class="fn fni" id="firmante" placeholder="Nombre de quien firma (opcional)" value="${esc(c.firmante||'')}"><div class="fn fnp">${esc(c.firmante||'')||'&nbsp;'}</div><div class="fsub">${esc(c.nombre)}</div>`]].map(([k,t,n])=>`<div class="fbox"><div class="ft">${t}</div><div class="fpad"><canvas data-k="${k}"></canvas><button class="fclr" onclick="borrarFirma('${k}')">Borrar</button>${(S.firmas||{})[k]?'':'<span class="fhint">Firme aquí ✍</span>'}</div>${n}</div>`).join('')}</div>${empFooter()}${geoDoc()}</div>`;initFirmas();pdfState();invalidatePDF()}
 function initFirmas(){const fi=$('#firmante');if(fi)fi.oninput=()=>{S.cli.firmante=fi.value;fi.nextElementSibling.textContent=fi.value||'\u00a0';save()};
  document.querySelectorAll('.fpad canvas').forEach(cv=>{const k=cv.dataset.k,r=Math.max(2,devicePixelRatio||1),W=cv.clientWidth,H=cv.clientHeight;cv.width=W*r;cv.height=H*r;const x=cv.getContext('2d');x.scale(r,r);x.lineCap=x.lineJoin='round';x.strokeStyle='#14286e';
   const d=(S.firmas||{})[k];if(d){const im=new Image();im.onload=()=>x.drawImage(im,0,0,W,H);im.src=d}
@@ -109,3 +109,42 @@ async function borrar(id){const q=LIST.find(x=>x.id==id);if(!confirm(`¿Eliminar
  if(CFG.auto&&CFG.lastBackupDay!=hoy()&&CFG.lastChange>CFG.lastBackup)setTimeout(()=>exportar(true),1200);
 })();
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
+
+// ---- Ubicación geolocalizada + ortofoto ----
+const GMS=(v,p,n)=>{const a=Math.abs(v),d=Math.floor(a),m=Math.floor((a-d)*60),s=((a-d)*60-m)*60;return `${d}°${String(m).padStart(2,'0')}'${s.toFixed(1).padStart(4,'0')}" ${v<0?n:p}`};
+const GTXT=g=>`${g.lat.toFixed(6)}, ${g.lon.toFixed(6)}`,GGMS=g=>GMS(g.lat,'N','S')+'  '+GMS(g.lon,'E','O');
+const GMAP=g=>`https://www.google.com/maps?q=${g.lat.toFixed(6)},${g.lon.toFixed(6)}`;
+function geoPanel(){const g=S.geo;return `<div class="geop"><b>📍 Ubicación del servicio</b>${g?`<span class="geoi">${GTXT(g)} · ±${Math.round(g.acc)} m</span><button class="pbtn sb" onclick="capturarUbic()">🔄 Repetir ubicación</button><button class="pbtn sb gr" onclick="borrarUbic()">🗑 Borrar ubicación</button>`:`<span class="geoi">Añade una ortofoto de satélite de donde estás a la última página del PDF.</span><button class="pbtn sb" onclick="capturarUbic()">📍 Capturar ubicación</button>`}</div>`}
+function geoDoc(){const g=S.geo;if(!g)return'';return `<div class="ubic"><h3>📍 Ubicación del servicio</h3>${g.img?`<img class="orto" src="${g.img}">`:''}<div class="box"><b>Coordenadas:</b> ${GTXT(g)} (${GGMS(g)})<br><b>Precisión:</b> ±${Math.round(g.acc)} m · <b>Fecha:</b> ${new Date(g.fecha).toLocaleString('es-ES')}<br><b>Google Maps:</b> <a href="${GMAP(g)}">${GMAP(g)}</a>${g.src?`<br><small>Ortofoto: ${esc(g.src)}</small>`:''}</div></div>`}
+function borrarUbic(){if(!confirm('¿Borrar la ubicación de este presupuesto?'))return;delete S.geo;save();render()}
+function capturarUbic(){if(!navigator.geolocation){toast('Este dispositivo no permite obtener la ubicación.');return}
+ loading(1,'Obteniendo ubicación GPS…');
+ navigator.geolocation.getCurrentPosition(async p=>{const g={lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy||0,fecha:new Date().toISOString()};
+  loading(1,'Descargando ortofoto…');try{const r=await ortofoto(g.lat,g.lon,g.acc);g.img=r.img;g.src=r.src}catch(e){toast('Ubicación guardada, pero no se pudo descargar la ortofoto (¿sin internet?).')}
+  S.geo=g;save();loading(0);render();toast('📍 Ubicación capturada')},
+ e=>{loading(0);toast(e.code==1?'Permiso de ubicación denegado. Actívelo en los ajustes del navegador para esta app.':e.code==2?'No hay señal GPS / ubicación no disponible. Salga al exterior o active el GPS y repita.':e.code==3?'Tiempo agotado buscando la ubicación. Inténtelo de nuevo.':'Error de ubicación: '+e.message)},
+ {enableHighAccuracy:true,timeout:25000,maximumAge:0})}
+const loadImg=async u=>{const r=await fetch(u,{mode:'cors'});if(!r.ok)throw Error('HTTP '+r.status);const b=await r.blob();if(!/image/.test(b.type))throw Error('no image');return await createImageBitmap(b)};
+async function ortofoto(lat,lon,acc){const W=1000,H=700,R=6378137,x=R*lon*Math.PI/180,y=R*Math.log(Math.tan(Math.PI/4+lat*Math.PI/360));
+ const mpp=0.3/Math.cos(lat*Math.PI/180);// ~0.3 m/px en suelo -> 300x210 m
+ const c=document.createElement('canvas');c.width=W;c.height=H;const ctx=c.getContext('2d');let src,gm;// metros reales por pixel
+ try{const bb=[x-W/2*mpp,y-H/2*mpp,x+W/2*mpp,y+H/2*mpp].map(v=>v.toFixed(2)).join(',');
+  const im=await loadImg(`https://www.ign.es/wms-inspire/pnoa-ma?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=OI.OrthoimageCoverage&STYLES=&CRS=EPSG:3857&BBOX=${bb}&WIDTH=${W}&HEIGHT=${H}&FORMAT=image/jpeg`);
+  ctx.drawImage(im,0,0,W,H);src='PNOA © Instituto Geográfico Nacional (IGN)';gm=mpp*Math.cos(lat*Math.PI/180)}
+ catch(e){const z=18,n=2**z,fx=(lon+180)/360*n,fy=(1-Math.log(Math.tan(lat*Math.PI/180)+1/Math.cos(lat*Math.PI/180))/Math.PI)/2*n,tx=Math.floor(fx),ty=Math.floor(fy);
+  const ox=W/2-(fx-tx)*256,oy=H/2-(fy-ty)*256,jobs=[];
+  for(let dx=-3;dx<=3;dx++)for(let dy=-2;dy<=2;dy++){const px=ox+dx*256,py=oy+dy*256;if(px>W||py>H||px<-256||py<-256)continue;
+   jobs.push(loadImg(`https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${ty+dy}/${tx+dx}`).then(im=>ctx.drawImage(im,px,py)).catch(()=>0))}
+  ctx.fillStyle='#ccc';ctx.fillRect(0,0,W,H);await Promise.all(jobs);src='Esri World Imagery (Esri, Maxar, Earthstar Geographics)';gm=2*Math.PI*R*Math.cos(lat*Math.PI/180)/(n*256)}
+ // círculo de precisión
+ const cx=W/2,cy=H/2,ar=Math.min(acc/gm,400);if(ar>12){ctx.beginPath();ctx.arc(cx,cy,ar,0,7);ctx.fillStyle='rgba(200,16,46,.15)';ctx.fill();ctx.strokeStyle='rgba(200,16,46,.8)';ctx.lineWidth=2;ctx.stroke()}
+ // marcador
+ ctx.save();ctx.translate(cx,cy);ctx.beginPath();ctx.moveTo(0,0);ctx.bezierCurveTo(-6,-14,-20,-24,-20,-38);ctx.arc(0,-38,20,Math.PI,0);ctx.bezierCurveTo(20,-24,6,-14,0,0);ctx.fillStyle='#C8102E';ctx.fill();ctx.lineWidth=3;ctx.strokeStyle='#fff';ctx.stroke();ctx.beginPath();ctx.arc(0,-38,7,0,7);ctx.fillStyle='#fff';ctx.fill();ctx.restore();
+ // escala
+ const opts=[10,20,25,50,100,200,500],m=opts.reduce((a,v)=>v/gm<=220?v:a,10),L=m/gm;
+ ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillRect(14,H-50,L+20,36);ctx.fillStyle='#222';ctx.fillRect(24,H-24,L,5);ctx.fillRect(24,H-30,3,11);ctx.fillRect(24+L-3,H-30,3,11);ctx.font='bold 15px Arial';ctx.fillText(m+' m',24,H-31);
+ // texto
+ const t1=`${lat.toFixed(6)}, ${lon.toFixed(6)}`,t2=GMS(lat,'N','S')+'  '+GMS(lon,'E','O');ctx.font='bold 18px Arial';const bw=Math.max(ctx.measureText(t1).width,ctx.measureText(t2).width)+24;
+ ctx.fillStyle='rgba(0,0,0,.65)';ctx.fillRect(W-bw-14,14,bw,56);ctx.fillStyle='#fff';ctx.fillText(t1,W-bw-2,38);ctx.font='16px Arial';ctx.fillText(t2,W-bw-2,60);
+ ctx.font='12px Arial';const at=src;const aw=ctx.measureText(at).width+12;ctx.fillStyle='rgba(255,255,255,.8)';ctx.fillRect(W-aw,H-20,aw,20);ctx.fillStyle='#333';ctx.fillText(at,W-aw+6,H-6);
+ return{img:c.toDataURL('image/jpeg',.82),src}}
