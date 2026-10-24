@@ -1,4 +1,4 @@
-const ESTAB=['Bar','Cafetería','Restaurante','Taller','Carnicería','Panadería','Pescadería','Frutería','Supermercado','Tienda','Oficina','Farmacia','Clínica','Peluquería','Gimnasio','Nave industrial','Almacén','Colegio','Guardería','Residencia'];
+const ESTAB=['Bar','Cafetería','Restaurante','Taller','Carnicería','Inmobiliaria','Minimercado','Panadería','Pescadería','Frutería','Supermercado','Tienda','Oficina','Farmacia','Clínica','Peluquería','Gimnasio','Nave industrial','Almacén','Colegio','Guardería','Residencia'];
 const TL=(c,long)=>c?.tipo=='comunidad'?(long?'Comunidad de vecinos':'Comunidad'):c?.tipo=='estab'?(c.estab||'Establecimiento'):'Hotel';
 const ZONAS=['Recepción / Hall','Bar','Cafetería','Restaurante','Buffet','Cocina principal','Cocina auxiliar','Office','Cámaras frigoríficas','Almacén de alimentos','Almacén general','Bodega','Economato','Cuarto de basuras','Muelle de carga','Lavandería','Lencería','Habitaciones','Pasillos de habitaciones','Piscina','Bar de piscina','Jardines','Zonas verdes','Terrazas','Azotea','Patios','Spa','Gimnasio','Vestuarios','Aseos públicos','Sala de máquinas','Sala de calderas','Cuarto de contadores','Garaje / Parking','Trasteros','Ascensores','Escaleras','Portal','Zonas comunes','Arquetas y alcantarillado','Bajantes','Comedor de personal','Oficinas','Salón de eventos','Discoteca / Animación','Parque infantil','Otra'];
 const PLAGAS=['Cucarachas (germánica)','Cucarachas (americana)','Roedores (ratas/ratones)','Hormigas','Termitas / Xilófagos','Mosquitos','Moscas','Chinches','Pulgas','Palomas','Polilla','Pececillo de plata','Avispas','Otra'];
@@ -76,7 +76,7 @@ const HP=z=>+z.precio>0;
 const ORD=()=>[...S.zonas.filter(z=>z.hot),...S.zonas.filter(z=>!z.hot)];
 function doc(){const VAL=!S.zonas.some(HP),c=S.cli,base=S.zonas.reduce((a,z)=>a+(+z.precio||0),0),ig=base*.07,num='TP-'+(c.fecha||'').replace(/-/g,'')+'-'+(c.nombre||'X').slice(0,3).toUpperCase();
  const fecha=c.fecha?new Date(c.fecha).toLocaleDateString('es-ES'):'';
- $('#view').innerHTML=`<div class="pdfst" id="pdfst"></div><div class="acts"><button class="pbtn" onclick="print()">🖨 Imprimir / Guardar PDF</button><button class="pbtn sb wa" onclick="compartir('wa')">📲 Enviar por WhatsApp</button><button class="pbtn sb" onclick="compartir('mail')">✉ Enviar por correo</button><button class="pbtn sb gr" onclick="compartir('dl')">⬇ Descargar PDF</button></div>${geoPanel()}<div class="doc">
+ $('#view').innerHTML=`<div class="pdfst" id="pdfst"></div><div class="acts">${S.pid?`<a class="pbtn sb gr tpback" href="../teprospeccion/">↩ Volver a TeProspección</a>`:''}<button class="pbtn" onclick="tprosSync();print()">🖨 Imprimir / Guardar PDF</button><button class="pbtn sb wa" onclick="compartir('wa')">📲 Enviar por WhatsApp</button><button class="pbtn sb" onclick="compartir('mail')">✉ Enviar por correo</button><button class="pbtn sb gr" onclick="compartir('dl')">⬇ Descargar PDF</button></div>${geoPanel()}<div class="doc">
 <div class="dh"><div style="display:flex;gap:10px;align-items:center"><img src="logo.png"><div><b style="color:var(--r);font-size:20px;letter-spacing:2px">${esc(EMP().nombre.toUpperCase())}</b><br><small>Control de plagas · Empresa certificada por Sanidad${empLines()}</small></div></div><div style="text-align:right"><h2>${VAL?'VALORACIÓN TÉCNICA':'PRESUPUESTO'}</h2><small>Nº ${esc(num)}<br>Fecha: ${fecha}</small></div></div>
 <div class="box"><b>Cliente:</b> ${esc(c.nombre)} (${c.tipo=='estab'?'Establecimiento: '+esc(TL(c)):TL(c,1)})<br><b>Dirección:</b> ${esc(c.dir)}<br>${c.tel?'<b>Tel:</b> '+esc(c.tel)+' ':''}${c.email?'<b>Email:</b> '+esc(c.email):''}${[['empresa','Empresa'],['cif','CIF'],['dirfiscal','Dirección fiscal'],['hotel','Hotel'],['dirhotel','Dirección del establecimiento']].filter(([k])=>(c[k]||'').trim()).map(([k,l])=>`<br><b>${l}:</b> ${esc(c[k])}`).join('')}<br><b>Técnico:</b> ${esc(c.tecnico)}</div>
 ${(H=>H.length?`<div class="hotsum"><b>🔥 Puntos calientes (${H.length}) — prioridad alta</b><ul>${H.map(z=>`<li><b>${esc(ZT(z))}</b>${z.plaga?' — '+esc(z.plaga):''}</li>`).join('')}</ul></div>`:'')(S.zonas.filter(z=>z.hot))}<h3>Puntos de inspección</h3>${ORD().map((z,i)=>{const fs=z.fotos||[];return `<div class="z ${z.hot?'zhot':''}">${z.hot?'<div class="flag">🔥 PUNTO CALIENTE · PRIORIDAD ALTA</div>':''}<h3><span>${i+1}. ${esc(ZT(z))}</span><span>${HP(z)?eur(z.precio):''}</span></h3><p style="font-size:14px;margin:6px 0"><b>Plaga:</b> ${esc(z.plaga)}${z.abre||z.cierra?` · <b>Horario:</b> ${z.abre||'—'} – ${z.cierra||'—'}`:''}<br>${esc(z.obs)}</p>${(z.srv||[]).map(id=>SRV.find(v=>v.id==id)).filter(Boolean).length?`<div class="zs"><b>Servicios:</b><ul>${(z.srv||[]).map(id=>SRV.find(v=>v.id==id)).filter(Boolean).map(v=>`<li><b>${esc(v.n)}</b>${v.d?' — '+esc(v.d):''}</li>`).join('')}</ul></div>`:''}${fs[0]||fs[1]?`<div class="c2">${[0,1].filter(k=>fs[k]).map(k=>`<img src="${fs[k]}">`).join('')}</div>`:''}${fs.slice(2).some(x=>x)?`<div class="g6">${fs.slice(2).filter(x=>x).map(x=>`<img src="${x}">`).join('')}</div>`:''}</div>`}).join('')||'<p>Sin zonas añadidas.</p>'}
@@ -104,6 +104,7 @@ async function borrar(id){const q=LIST.find(x=>x.id==id);if(!confirm(`¿Eliminar
  SRV=(await mGet('srv'))||DEFSRV.map(([n,d],i)=>({id:'s'+i,n,d}));CFG=Object.assign(CFG,await mGet('cfg')||{});
  const all=await dbAll(),cur=await mGet('cur');S=all.find(q=>q.id==cur)||all.sort((a,b)=>b.upd-a.upd)[0];
  if(!S){S=newQ();await dbPut(S);mSet('cur',S.id)}else step=Math.min(+(await mGet('step'))||0,S.zonas.length+1);
+ try{await importTpros()}catch(e){console.warn('importTpros',e)}
  window.EXP=['cif','hotel','empresa','dirfiscal','dirhotel'].some(k=>S.cli[k]);await loadList();render();
  if(navigator.storage?.persist)navigator.storage.persisted().then(p=>p||navigator.storage.persist());
  if(CFG.auto&&CFG.lastBackupDay!=hoy()&&CFG.lastChange>CFG.lastBackup)setTimeout(()=>exportar(true),1200);
@@ -114,8 +115,8 @@ if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
 const GMS=(v,p,n)=>{const a=Math.abs(v),d=Math.floor(a),m=Math.floor((a-d)*60),s=((a-d)*60-m)*60;return `${d}°${String(m).padStart(2,'0')}'${s.toFixed(1).padStart(4,'0')}" ${v<0?n:p}`};
 const GTXT=g=>`${g.lat.toFixed(6)}, ${g.lon.toFixed(6)}`,GGMS=g=>GMS(g.lat,'N','S')+'  '+GMS(g.lon,'E','O');
 const GMAP=g=>`https://www.google.com/maps?q=${g.lat.toFixed(6)},${g.lon.toFixed(6)}`;
-function geoPanel(){const g=S.geo;return `<div class="geop"><b>📍 Ubicación del servicio</b>${g?`<span class="geoi">${GTXT(g)} · ±${Math.round(g.acc)} m</span><button class="pbtn sb" onclick="capturarUbic()">🔄 Repetir ubicación</button><button class="pbtn sb gr" onclick="borrarUbic()">🗑 Borrar ubicación</button>`:`<span class="geoi">Añade una ortofoto de satélite de donde estás a la última página del PDF.</span><button class="pbtn sb" onclick="capturarUbic()">📍 Capturar ubicación</button>`}</div>`}
-function geoDoc(){const g=S.geo;if(!g)return'';return `<div class="ubic"><h3>📍 Ubicación del servicio</h3>${g.img?`<img class="orto" src="${g.img}">`:''}<div class="box"><b>Coordenadas:</b> ${GTXT(g)} (${GGMS(g)})<br><b>Precisión:</b> ±${Math.round(g.acc)} m · <b>Fecha:</b> ${new Date(g.fecha).toLocaleString('es-ES')}<br><b>Google Maps:</b> <a href="${GMAP(g)}">${GMAP(g)}</a>${g.src?`<br><small>Ortofoto: ${esc(g.src)}</small>`:''}</div></div>`}
+function geoPanel(){const g=S.geo;return `<div class="geop"><b>📍 Ubicación del servicio</b>${g?`<span class="geoi">${GTXT(g)}${g.acc?' · ±'+Math.round(g.acc)+' m':' · '+esc(g.origen||'')}</span><button class="pbtn sb" onclick="capturarUbic()">🔄 Repetir ubicación</button><button class="pbtn sb gr" onclick="borrarUbic()">🗑 Borrar ubicación</button>`:`<span class="geoi">Añade una ortofoto de satélite de donde estás a la última página del PDF.</span><button class="pbtn sb" onclick="capturarUbic()">📍 Capturar ubicación</button>`}</div>`}
+function geoDoc(){const g=S.geo;if(!g)return'';return `<div class="ubic"><h3>📍 Ubicación del servicio</h3>${g.img?`<img class="orto" src="${g.img}">`:''}<div class="box"><b>Coordenadas:</b> ${GTXT(g)} (${GGMS(g)})${g.acc?`<br><b>Precisión:</b> ±${Math.round(g.acc)} m · `:'<br>'}<b>Fecha:</b> ${new Date(g.fecha).toLocaleString('es-ES')}<br><b>Google Maps:</b> <a href="${GMAP(g)}">${GMAP(g)}</a>${g.src?`<br><small>Ortofoto: ${esc(g.src)}</small>`:''}</div></div>`}
 function borrarUbic(){if(!confirm('¿Borrar la ubicación de este presupuesto?'))return;delete S.geo;save();render()}
 function capturarUbic(){if(!navigator.geolocation){toast('Este dispositivo no permite obtener la ubicación.');return}
  loading(1,'Obteniendo ubicación GPS…');
@@ -148,3 +149,22 @@ async function ortofoto(lat,lon,acc){const W=1000,H=700,R=6378137,x=R*lon*Math.P
  ctx.fillStyle='rgba(0,0,0,.65)';ctx.fillRect(W-bw-14,14,bw,56);ctx.fillStyle='#fff';ctx.fillText(t1,W-bw-2,38);ctx.font='16px Arial';ctx.fillText(t2,W-bw-2,60);
  ctx.font='12px Arial';const at=src;const aw=ctx.measureText(at).width+12;ctx.fillStyle='rgba(255,255,255,.8)';ctx.fillRect(W-aw,H-20,aw,20);ctx.fillStyle='#333';ctx.fillText(at,W-aw+6,H-6);
  return{img:c.toDataURL('image/jpeg',.82),src}}
+
+// ---- Integración con TeProspección ----
+const TPCAT={bar:'Bar',cafe:'Cafetería',rest:'Restaurante',inmo:'Inmobiliaria',super:'Supermercado',mini:'Minimercado',taller:'Taller',carn:'Carnicería',pan:'Panadería',farm:'Farmacia',gym:'Gimnasio',pelu:'Peluquería',cole:'Colegio',clin:'Clínica',alm:'Almacén'};
+const qHasData=q=>!!(q&&((q.cli.nombre||'').trim()||(q.cli.dir||'').trim()||(q.cli.tel||'').trim()||q.zonas.length||q.geo||(q.firmas&&Object.keys(q.firmas).length)));
+async function importTpros(){const P=new URLSearchParams(location.search);if(P.get('from')!='tpros')return;
+ history.replaceState(null,'',location.pathname);
+ const g=k=>(P.get(k)||'').trim();
+ if(qHasData(S)){await dbPut(S);S=newQ()}else{const id=S.id;S=newQ();S.id=id}
+ const cat=g('cat'),c=S.cli;
+ if(cat=='hotel')c.tipo='hotel';else{c.tipo='estab';const e=TPCAT[cat]||(cat&&cat[0].toUpperCase()+cat.slice(1))||'';
+  if(e){if(![...ESTAB,...(CFG.estab||[])].includes(e)){CFG.estab=[...(CFG.estab||[]),e];mSet('cfg',CFG)}c.estab=e}}
+ c.nombre=g('nombre');c.dir=g('dir');c.dirhotel=g('dir');c.tel=g('tel');S.pid=g('pid');S.origen='teprospeccion';
+ const lat=parseFloat(g('lat')),lon=parseFloat(g('lon'));
+ if(isFinite(lat)&&isFinite(lon)){S.geo={lat,lon,acc:0,fecha:new Date().toISOString(),origen:'TeProspección (Google Maps)'};
+  if(navigator.onLine!==false)ortofoto(lat,lon,0).then(r=>{if(S.geo&&S.geo.lat==lat&&S.geo.lon==lon&&!S.geo.img){S.geo.img=r.img;S.geo.src=r.src;save();if(step==N()-1)render()}}).catch(e=>console.warn('ortofoto',e))}
+ step=0;await dbPut(S);mSet('cur',S.id);mSet('step',0);setTimeout(()=>toast('Datos importados de TeProspección'),300)}
+function tprosSync(){try{if(!S||!S.pid)return;const a=JSON.parse(localStorage.getItem('tpros_sync')||'[]');const ref=docInfo().num;
+ if(a.some(x=>x.pid==S.pid&&x.ref==ref))return;a.push({pid:S.pid,fecha:new Date().toISOString(),estado:'presupuesto',ref,qid:S.id,val:!S.zonas.some(z=>+z.precio>0)});localStorage.setItem('tpros_sync',JSON.stringify(a))}catch(e){console.warn('tprosSync',e)}}
+{const _c=compartir;compartir=function(via){tprosSync();return _c(via)}}
