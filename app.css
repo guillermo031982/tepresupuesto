@@ -79,3 +79,11 @@ body{padding-bottom:230px}#fabs{bottom:128px}
 .ubic{margin-top:24px;break-before:page;page-break-before:always}.ubic .orto{width:100%;border:3px solid var(--r);border-radius:6px;display:block;margin:8px 0}.ubic a{color:var(--r);word-break:break-all}
 @media print{.geop{display:none!important}}
 a.pbtn{text-decoration:none;display:inline-block}
+
+.srvi{display:flex;flex-direction:column;gap:2px;border-bottom:1px solid #f0f0f0}.perS{width:auto;margin:0 6px 6px 40px;padding:6px 8px;font-size:14px;border-color:var(--r);color:var(--r);font-weight:600}
+.dtor{display:flex;gap:8px;flex:1 1 100%}.dtor select{flex:0 0 150px;width:auto}.dtor input{flex:1;min-width:0}.dtor input#dtoV,.dtor input#zdV{flex:0 0 110px}#zdT{flex:0 0 90px}
+.dtop{border-style:solid}
+.pu{color:#666;font-weight:400;font-size:11px}.perl{color:var(--r);font-weight:600}
+tr.dsc td{color:var(--r);font-weight:600}tr.dz td{font-size:13px;color:var(--r)}
+table.persum{margin-top:10px;font-size:13px}table.persum th{background:#777;font-size:12px}tr.tot2 td{font-weight:700}
+@media print{.dtop{display:none!important}}
