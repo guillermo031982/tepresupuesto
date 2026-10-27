@@ -87,3 +87,5 @@ a.pbtn{text-decoration:none;display:inline-block}
 tr.dsc td{color:var(--r);font-weight:600}tr.dz td{font-size:13px;color:var(--r)}
 table.persum{margin-top:10px;font-size:13px}table.persum th{background:#777;font-size:12px}tr.tot2 td{font-weight:700}
 @media print{.dtop{display:none!important}}
+
+.perw{display:block}.srvi .perw{margin:0 6px 6px 40px}.srvi .perS{margin:0}.perc{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.perc .pert{flex:2 1 160px;min-width:0}.perc .pern{flex:1 1 110px;min-width:0}.perc input{padding:7px 9px;font-size:14px;border-color:var(--r)}
